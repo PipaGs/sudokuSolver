@@ -1,13 +1,18 @@
 {
-  "name": "sudoku",
+  "name": "@pipags/sudoku-solver",
   "version": "1.0.0",
-  "description": "Sudoku solver and generator",
+  "description": "Sudoku solver and generator with TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "start": "node dist/examples.js"
+    "prepublishOnly": "npm run build",
+    "prepare": "npm run build"
   },
   "keywords": [
     "sudoku",
@@ -16,8 +21,16 @@
     "solver",
     "typescript"
   ],
-  "author": "",
-  "license": "ISC",
+  "author": "PipaGs",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PipaGs/sudokuSolver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/PipaGs/sudokuSolver/issues"
+  },
+  "homepage": "https://github.com/PipaGs/sudokuSolver#readme",
   "devDependencies": {
     "@types/jest": "^29.5.12",
     "@types/node": "^20.11.24",
