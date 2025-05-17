@@ -1,49 +1,70 @@
 import SudokuGenerator from './generator'
-import SudokuSolver from './sudoku'
 
-// Example of a hard Sudoku puzzle
-const hardSudoku: number[][] = [
-  [0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 0, 0, 3, 0, 8, 5],
-  [0, 0, 1, 0, 2, 0, 0, 0, 0],
-  [0, 0, 0, 5, 0, 7, 0, 0, 0],
-  [0, 0, 4, 0, 0, 0, 1, 0, 0],
-  [0, 9, 0, 0, 0, 0, 0, 0, 0],
-  [5, 0, 0, 0, 0, 0, 0, 7, 3],
-  [0, 0, 2, 0, 1, 0, 0, 0, 0],
-  [0, 0, 0, 0, 4, 0, 0, 0, 9],
-]
+const sudokuGeneratorExample = new SudokuGenerator()
 
-// Example of solving a Sudoku puzzle
-const solver = new SudokuSolver(hardSudoku)
-const solution = solver.getSolution()
+console.log('=== Example 1: Generate Sudoku and ID ===')
+const sudokuResultExample = sudokuGeneratorExample.generateSudoku('hard')
+console.log('Generated Sudoku (hard level):')
+console.table(sudokuResultExample.puzzle)
+console.log('Solution:')
+console.table(sudokuResultExample.solution)
+console.log('Sudoku ID (base64):', sudokuResultExample.id)
 
-if (solution) {
-  console.log('Solution found:')
-  console.log(solution.map((row) => row.join(' ')).join('\n'))
-} else {
-  console.log('No solution found')
-}
+console.log('\n=== Example 2: Restore Sudoku from ID ===')
+const restoredSudokuExample = sudokuGeneratorExample.generateFromId(
+  sudokuResultExample.id,
+  'hard'
+)
+console.log('Restored Sudoku:')
+console.table(restoredSudokuExample.puzzle)
+console.log('Restored solution:')
+console.table(restoredSudokuExample.solution)
+console.log('ID matches:', restoredSudokuExample.id === sudokuResultExample.id)
 
-// Example of generating a Sudoku puzzle
-const generator = new SudokuGenerator()
+console.log('\n=== Example 3: Generate Multiple Sudokus ===')
+const multipleSudokuPuzzlesExample =
+  sudokuGeneratorExample.generateMultipleSudoku(3, 'medium')
+console.log('Generated 3 Sudokus (medium level):')
+multipleSudokuPuzzlesExample.forEach((item, idx) => {
+  console.log(`\nSudoku #${idx + 1}:`)
+  console.log('ID:', item.id)
+  console.log('Puzzle:')
+  console.table(item.puzzle)
+  console.log('Solution:')
+  console.table(item.solution)
+})
 
-// Generate a medium difficulty Sudoku
-const { puzzle, solution: generatedSolution } =
-  generator.generateSudoku('medium')
+console.log('\n=== Example 4: Restore All Sudokus from IDs ===')
+console.log('Restoring all generated Sudokus from their IDs:')
+multipleSudokuPuzzlesExample.forEach((item, idx) => {
+  const restored = sudokuGeneratorExample.generateFromId(item.id, 'medium')
+  console.log(`\nRestored Sudoku #${idx + 1}:`)
+  console.log('ID matches:', restored.id === item.id)
+  console.log(
+    'Solution matches:',
+    JSON.stringify(restored.solution) === JSON.stringify(item.solution)
+  )
+  console.table(restored.puzzle)
+})
 
-console.log('\nGenerated Sudoku (medium difficulty):')
-console.log(puzzle.map((row) => row.join(' ')).join('\n'))
+console.log('\n=== Example 5: Generate Sudokus with Different Difficulties ===')
+const originalSudoku = sudokuGeneratorExample.generateSudoku('hard')
+console.log('Original Sudoku (hard level):')
+console.log('ID:', originalSudoku.id)
+console.table(originalSudoku.puzzle)
 
-console.log('\nSolution:')
-console.log(generatedSolution.map((row) => row.join(' ')).join('\n'))
-
-// Generate multiple Sudoku puzzles of different difficulties
 const difficulties = ['easy', 'medium', 'hard', 'extreme'] as const
-const multipleSudokus = generator.generateMultipleSudoku(4, 'medium')
-
-console.log('\nMultiple generated Sudoku puzzles:')
-multipleSudokus.forEach((sudoku, index) => {
-  console.log(`\nSudoku #${index + 1}:`)
-  console.log(sudoku.puzzle.map((row) => row.join(' ')).join('\n'))
+difficulties.forEach((difficulty) => {
+  const restored = sudokuGeneratorExample.generateFromId(
+    originalSudoku.id,
+    difficulty
+  )
+  console.log(`\nRestored Sudoku (${difficulty} level):`)
+  console.log('ID matches:', restored.id === originalSudoku.id)
+  console.log(
+    'Solution matches:',
+    JSON.stringify(restored.solution) ===
+      JSON.stringify(originalSudoku.solution)
+  )
+  console.table(restored.puzzle)
 })

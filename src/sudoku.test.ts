@@ -91,10 +91,34 @@ describe('SudokuSolver', () => {
 
     const solver = new SudokuSolver(puzzle)
 
-    expect((solver as any).isValid(1, [0, 1])).toBe(false)
-    expect((solver as any).isValid(1, [1, 0])).toBe(false)
-    expect((solver as any).isValid(1, [1, 1])).toBe(false)
-    expect((solver as any).isValid(2, [0, 1])).toBe(true)
+    expect(
+      (
+        solver as unknown as {
+          isValid: (num: number, pos: [number, number]) => boolean
+        }
+      ).isValid(1, [0, 1])
+    ).toBe(false)
+    expect(
+      (
+        solver as unknown as {
+          isValid: (num: number, pos: [number, number]) => boolean
+        }
+      ).isValid(1, [1, 0])
+    ).toBe(false)
+    expect(
+      (
+        solver as unknown as {
+          isValid: (num: number, pos: [number, number]) => boolean
+        }
+      ).isValid(1, [1, 1])
+    ).toBe(false)
+    expect(
+      (
+        solver as unknown as {
+          isValid: (num: number, pos: [number, number]) => boolean
+        }
+      ).isValid(2, [0, 1])
+    ).toBe(true)
   })
 
   test('finds empty cell', () => {
@@ -104,7 +128,9 @@ describe('SudokuSolver', () => {
     puzzle[0][0] = 1
 
     const solver = new SudokuSolver(puzzle)
-    const emptyCell = (solver as any).findEmptyCell()
+    const emptyCell = (
+      solver as unknown as { findEmptyCell: () => [number, number] | null }
+    ).findEmptyCell()
 
     expect(emptyCell).not.toBeNull()
     expect(emptyCell![0]).toBe(0)
@@ -117,7 +143,9 @@ describe('SudokuSolver', () => {
       .map(() => Array(9).fill(1))
 
     const solver = new SudokuSolver(fullGrid)
-    const emptyCell = (solver as any).findEmptyCell()
+    const emptyCell = (
+      solver as unknown as { findEmptyCell: () => [number, number] | null }
+    ).findEmptyCell()
 
     expect(emptyCell).toBeNull()
   })

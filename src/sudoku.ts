@@ -12,7 +12,7 @@ class SudokuSolver {
   }
 
   public solve(): Grid | null {
-    if (this.solveSudoku(0, 0)) {
+    if (this.solveSudoku()) {
       return this.grid.map((row) => [...row])
     }
     return null
@@ -23,10 +23,10 @@ class SudokuSolver {
   }
 
   private findEmptyCell(): [number, number] | null {
-    for (let row = 0; row < this.size; row++) {
-      for (let col = 0; col < this.size; col++) {
-        if (this.grid[row][col] === 0) {
-          return [row, col]
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) {
+        if (this.grid[i][j] === 0) {
+          return [i, j]
         }
       }
     }
@@ -69,7 +69,7 @@ class SudokuSolver {
     return true
   }
 
-  private solveSudoku(row: number, col: number): boolean {
+  private solveSudoku(): boolean {
     const emptyCell = this.findEmptyCell()
 
     if (!emptyCell) {
@@ -82,7 +82,7 @@ class SudokuSolver {
       if (this.isValid(num, [currentRow, currentCol])) {
         this.grid[currentRow][currentCol] = num
 
-        if (this.solveSudoku(currentRow, currentCol)) {
+        if (this.solveSudoku()) {
           return true
         }
 

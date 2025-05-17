@@ -15,14 +15,17 @@ import { Sudoku, Generator } from '@pipags/sudoku-solver';
 
 // Create a new Sudoku puzzle
 const generator = new Generator();
-const puzzle = generator.generateSudoku('easy');
+const result = generator.generateSudoku('easy');
+
+// result contains: { id: string, puzzle: number[][], solution: number[][] }
+console.log('Puzzle:', result.puzzle);
+console.log('Solution:', result.solution);
+console.log('ID:', result.id); // ID is in base64url format
 
 // Solve the puzzle
-const sudoku = new Sudoku(puzzle);
+const sudoku = new Sudoku(result.puzzle);
 const solution = sudoku.getSolution();
-
-console.log('Puzzle:', puzzle);
-console.log('Solution:', solution);
+console.log('Solved:', solution);
 ```
 
 ## Features
@@ -33,10 +36,9 @@ console.log('Solution:', solution);
   - Medium
   - Hard
   - Extreme
-  - Minimal
-  - Symmetric
 - TypeScript support with type definitions
 - 100% test coverage
+- Generate unique IDs in base64url format for each puzzle
 
 ## API
 
@@ -55,9 +57,28 @@ class Sudoku {
 
 ```typescript
 class Generator {
-  generateSudoku(difficulty: 'easy' | 'medium' | 'hard' | 'extreme' | 'minimal' | 'symmetric'): number[][];
+  generateSudoku(difficulty: 'easy' | 'medium' | 'hard' | 'extreme'): { id: string, puzzle: number[][], solution: number[][] };
+  generateFromId(id: string, difficulty?: 'easy' | 'medium' | 'hard' | 'extreme'): { id: string, puzzle: number[][], solution: number[][] };
+  generateMultipleSudoku(count: number, difficulty?: 'easy' | 'medium' | 'hard' | 'extreme'): { id: string, puzzle: number[][], solution: number[][] }[];
 }
 ```
+
+## Project Structure
+
+- `src/index.ts` - exports library components
+- `src/sudoku.ts` - Sudoku solving logic
+- `src/generator.ts` - puzzle generator
+- `src/examples.ts` - usage examples
+
+## How it Works
+
+Uses backtracking to solve Sudoku puzzles:
+
+1. Find empty cell
+2. Try numbers 1-9
+3. Check row, column and box
+4. Move to next cell if valid
+5. Backtrack if stuck
 
 ## License
 
@@ -69,7 +90,6 @@ MIT
 - `src/sudoku.ts` - Sudoku solving logic
 - `src/generator.ts` - puzzle generator
 - `src/examples.ts` - usage examples
-- `package.json` - project dependencies
 
 ## How it Works
 
@@ -111,7 +131,6 @@ npm start
 - `src/sudoku.ts` - логика решения судоку
 - `src/generator.ts` - генератор головоломок
 - `src/examples.ts` - примеры использования
-- `package.json` - зависимости проекта
 
 ## Как это работает
 
@@ -131,4 +150,4 @@ npm start
 - Hard (Сложный)
 - Extreme (Экстремальный)
 
-Все головоломки имеют единственное решение. 
+Все головоломки имеют единственное решение. Каждая головоломка имеет уникальный ID в формате base64url. 

@@ -1,8 +1,7 @@
-import SudokuSolver from './sudoku'
-
 export type Grid = number[][]
 export type Difficulty = 'easy' | 'medium' | 'hard' | 'extreme'
 export type SudokuResult = {
+  id: string
   puzzle: Grid
   solution: Grid
 }
@@ -19,17 +18,12 @@ class SudokuGenerator {
   }
 
   private isValid(grid: Grid, row: number, col: number, num: number): boolean {
-    // Check row
     for (let x = 0; x < this.size; x++) {
       if (grid[row][x] === num) return false
     }
-
-    // Check column
     for (let x = 0; x < this.size; x++) {
       if (grid[x][col] === num) return false
     }
-
-    // Check 3x3 box
     const startRow = row - (row % 3)
     const startCol = col - (col % 3)
     for (let i = 0; i < 3; i++) {
@@ -37,7 +31,6 @@ class SudokuGenerator {
         if (grid[i + startRow][j + startCol] === num) return false
       }
     }
-
     return true
   }
 
@@ -69,92 +62,97 @@ class SudokuGenerator {
     return true
   }
 
-  private createSolvedSudoku(): Grid {
-    const grid = this.emptyGrid.map((row) => [...row])
+  private createSolvedSudoku(): number[][] {
+    const grid = Array(9)
+      .fill(null)
+      .map(() => Array(9).fill(0))
     this.fillGrid(grid)
     return grid
   }
 
-  private removeNumbers(grid: Grid, difficulty: Difficulty): Grid {
-    const gridCopy = grid.map((row) => [...row])
-    const cells = this.shuffle([...Array(81).keys()])
-
-    const cellsToRemove: Record<Difficulty, number> = {
-      easy: 30,
-      medium: 40,
-      hard: 50,
-      extreme: 60,
-    }
+  private removeNumbers(
+    grid: number[][],
+    difficulty: 'easy' | 'medium' | 'hard' | 'extreme'
+  ): number[][] {
+    const puzzle = grid.map((row) => [...row])
+    const cellsToRemove = {
+      easy: 25,
+      medium: 35,
+      hard: 45,
+      extreme: 55,
+    }[difficulty]
 
     let removed = 0
-    let attempts = 0
-    const maxAttempts = 100 // Prevent infinite loop
-
-    while (removed < cellsToRemove[difficulty] && attempts < maxAttempts) {
-      const cell = cells[attempts % cells.length]
-      const row = Math.floor(cell / 9)
-      const col = cell % 9
-
-      if (gridCopy[row][col] !== 0) {
-        const temp = gridCopy[row][col]
-        gridCopy[row][col] = 0
-
-        const testGrid = gridCopy.map((row) => [...row])
-        if (this.hasUniqueSolution(testGrid)) {
-          removed++
-        } else {
-          gridCopy[row][col] = temp
-        }
+    while (removed < cellsToRemove) {
+      const row = Math.floor(Math.random() * 9)
+      const col = Math.floor(Math.random() * 9)
+      if (puzzle[row][col] !== 0) {
+        puzzle[row][col] = 0
+        removed++
       }
-      attempts++
     }
-
-    return gridCopy
+    return puzzle
   }
 
   private hasUniqueSolution(grid: Grid): boolean {
     let solutionsCount = 0
     const gridCopy = grid.map((row) => [...row])
-
     const findAllSolutions = (row = 0, col = 0): void => {
-      // Stop if we found more than one solution
       if (solutionsCount > 1) return
-
       if (row === 9) {
         solutionsCount++
         return
       }
-
-      // Move to next cell
       const nextRow = col === 8 ? row + 1 : row
       const nextCol = col === 8 ? 0 : col + 1
-
-      // If cell is not empty, move to next cell
       if (gridCopy[row][col] !== 0) {
         findAllSolutions(nextRow, nextCol)
         return
       }
-
-      // Try all possible numbers
       for (let num = 1; num <= 9; num++) {
         if (this.isValid(gridCopy, row, col, num)) {
           gridCopy[row][col] = num
           findAllSolutions(nextRow, nextCol)
-          if (solutionsCount > 1) return // Stop if we found more than one solution
+          if (solutionsCount > 1) return
           gridCopy[row][col] = 0
         }
       }
     }
-
     findAllSolutions()
     return solutionsCount === 1
+  }
+
+  private gridToBase64(grid: Grid): string {
+    const flat = grid
+      .flat()
+      .map((n) => n.toString())
+      .join('')
+    return Buffer.from(flat, 'utf8')
+      .toString('base64')
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '')
+  }
+
+  private base64ToGrid(b64url: string): Grid {
+    let b64 = b64url.replace(/-/g, '+').replace(/_/g, '/')
+    while (b64.length % 4 !== 0) b64 += '='
+    const str = Buffer.from(b64, 'base64').toString('utf8')
+    if (str.length !== 81) throw new Error('Invalid ID')
+    const arr = str.split('').map((c) => parseInt(c, 10))
+    if (!arr.every((n) => n >= 1 && n <= 9)) {
+      throw new Error('Invalid ID')
+    }
+    const grid: Grid = []
+    for (let i = 0; i < 9; i++) {
+      grid.push(arr.slice(i * 9, (i + 1) * 9))
+    }
+    return grid
   }
 
   public generateSudoku(difficulty: Difficulty = 'medium'): SudokuResult {
     const solvedGrid = this.createSolvedSudoku()
     const puzzle = this.removeNumbers(solvedGrid, difficulty)
-
-    // Check if we have enough empty cells
     const emptyCells = puzzle.flat().filter((cell) => cell === 0).length
     const minEmptyCells: Record<Difficulty, number> = {
       easy: 25,
@@ -162,13 +160,25 @@ class SudokuGenerator {
       hard: 45,
       extreme: 55,
     }
-
-    // If we haven't reached minimum empty cells, generate again
     if (emptyCells < minEmptyCells[difficulty]) {
       return this.generateSudoku(difficulty)
     }
-
+    const id = this.gridToBase64(solvedGrid)
     return {
+      id,
+      puzzle,
+      solution: solvedGrid,
+    }
+  }
+
+  public generateFromId(
+    id: string,
+    difficulty: Difficulty = 'medium'
+  ): SudokuResult {
+    const solvedGrid = this.base64ToGrid(id)
+    const puzzle = this.removeNumbers(solvedGrid, difficulty)
+    return {
+      id,
       puzzle,
       solution: solvedGrid,
     }
