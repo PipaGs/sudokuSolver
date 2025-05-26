@@ -1,29 +1,32 @@
 {
   "name": "@pipags/sudoku-solver",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Sudoku solver and generator with TypeScript",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./sudoku": {
       "types": "./dist/sudoku.d.ts",
-      "import": "./dist/sudoku.js"
+      "import": "./dist/sudoku.mjs",
+      "require": "./dist/sudoku.cjs"
     },
     "./generator": {
       "types": "./dist/generator.d.ts",
-      "import": "./dist/generator.js"
+      "import": "./dist/generator.mjs",
+      "require": "./dist/generator.cjs"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsup src/index.ts src/generator.ts src/sudoku.ts --format esm,cjs --dts --out-dir dist",
     "test": "jest",
     "prepublishOnly": "npm run build",
     "example": "ts-node src/examples.ts",
@@ -47,17 +50,18 @@
   },
   "homepage": "https://github.com/PipaGs/sudokuSolver#readme",
   "devDependencies": {
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20.11.24",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.15.21",
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
-    "eslint": "^8.57.1",
-    "husky": "^9.0.0",
+    "eslint": "^9.27.0",
+    "husky": "^9.1.7",
     "jest": "^29.7.0",
-    "ts-jest": "^29.1.2",
+    "ts-jest": "^29.3.4",
     "ts-node": "^10.9.2",
-    "tsdown": "^0.11.0-beta.5",
-    "typescript": "^5.3.3"
+    "tsdown": "^0.12.3",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3"
   },
   "husky": {
     "hooks": {
